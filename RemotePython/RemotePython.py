@@ -116,10 +116,7 @@ class RemotePython(object):
 
 def main():
     obj = RemotePython()
-    obj.ip = '192.168.0.106'
-    obj.user = 'allex'
-    print obj
-    print obj.runScript('RestServer.py')
+    print obj.runScript('remote_script.py')
     return 0
 
 if __name__ == '__main__':

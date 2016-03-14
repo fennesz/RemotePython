@@ -6,7 +6,7 @@ Created on Mar 6, 2016
 import unittest
 from RemotePython import RemotePython
 
-IP = '192.168.0.106'
+IP = 'localhost'
 
 class Test(unittest.TestCase):
     ''' Class containing unittests for the RemotePython module '''
@@ -14,9 +14,10 @@ class Test(unittest.TestCase):
     def testRunScript(self):
         ''' Test execution of a python script on a remote machine '''
 #         print self.testRunScript.__doc__
-        obj = RemotePython('remote_script.py')#, ip=IP, user='allex')
+        obj = RemotePython('remote_script.py', ip=IP)
         ret = obj.runScript()
         self.assertIn('the call worked', ret)
+
 
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin'''
