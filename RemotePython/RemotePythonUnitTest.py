@@ -5,32 +5,29 @@ Created on Mar 6, 2016
 '''
 import unittest
 from RemotePython import RemotePython
+from getpass import getuser
 
+# Change these to your remote machine keys to execute the testRunScript() test on your remote machine
 IP = 'localhost'
+USER = getuser()
+# LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
+LOCAL_UNAME = 'Darwin'
 
 class Test(unittest.TestCase):
     ''' Class containing unittests for the RemotePython module '''
 
     def testRunScript(self):
-        ''' Test execution of a python script on a remote machine '''
+        ''' Test execution of a python script on a remote machine'''
 #         print self.testRunScript.__doc__
-        obj = RemotePython('remote_script.py', ip=IP)
+        obj = RemotePython('remote_script.py', ip=IP, user=USER)
         ret = obj.runScript()
         self.assertIn('the call worked', ret)
 
-
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin'''
-#         print self.testRunCommand.__doc__
         obj = RemotePython()
         ret = obj.runCommand('uname', '-s')
-        self.assertEqual(ret, 'Darwin\n')
-
-#     def testRunCommandExcept(self):
-#         ''' Run unknown command on localhost, should raise RemotePythonError'''
-# #         print self.testRunCommandExcept.__doc__
-#         obj = RemotePython()
-#         self.assertRaises(obj.RemotePythonError, obj.runCommand, 'sshh', '-h')
+        self.assertEqual(ret, LOCAL_UNAME)
 
     def testRemoveScript(self):
         ''' Test if hidden function '__removeScript' works '''
@@ -47,7 +44,7 @@ class Test(unittest.TestCase):
     def testPrint(self):
         ''' Print the default object '''
 #         print self.testPrint.__doc__
-#         print RemotePython()
+        print RemotePython()
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testMain']
