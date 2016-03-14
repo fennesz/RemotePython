@@ -44,6 +44,7 @@ class RemotePython(object):
         remote_script:\t%s' % (self.__ip, self.__user, self.__remote_client, self.port, self.script)
      
     def __copyScript(self, script=None):
+        ''' Copy the to-be-executed script to the target machine, returns 'None is no script is specified.'''
         if not script:
             if self.script != None:
                 script = self.script
@@ -58,6 +59,7 @@ class RemotePython(object):
         #TODO: Add check if call is successful
     
     def __removeScript(self, script=None):
+        ''' Remove the used script from the target machine, returns 'None' is script is not specified.'''
         if not script:
             if self.script != None:
                 script = self.script
@@ -68,10 +70,16 @@ class RemotePython(object):
         #TODO: Add check if call is successful
         
     def getEnv(self):
+        '''
+        Determine the machine type of the target machine.
+        Return the correct command to load the environment on the target machine.
+        This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
+        '''
+        
         ret = self.runCommand('uname', '-s')
-        if ret == 'Linux\n': #Linux
+        if ret == 'Linux': #Linux
             profile = '~/.bashrc'
-        elif ret == 'Darwin\n': #OSX
+        elif ret == 'Darwin': #OSX
             profile = '~/.bash_profile'
         else:
             profile = '~/.login' #Solaris / rest
@@ -82,6 +90,7 @@ class RemotePython(object):
         '''
         Run a python script on a remote machine.
         The script should either be passed as an argument or predefined in the RemotePython object
+        Return 'None' if no script is specified.
         '''
         if not script:
             if self.script != None:
@@ -89,9 +98,10 @@ class RemotePython(object):
             else:
                 print "No script specified"
                 return None
-        # Copy script to remote machine
-        self.__copyScript(script)
+        
         try:
+            # Copy script to remote machine
+            self.__copyScript(script)
             profile = self.getEnv()
             # pre-load the environment, Run the python script and return its stdout
             ret = check_output(['ssh',
@@ -99,7 +109,7 @@ class RemotePython(object):
                                 '-p %s' % (self.port),
                                 '%s %s; python %s' % ('source', profile, script)])
             self.__removeScript(script)
-            return ret
+            return ret.strip()
         except CalledProcessError as e:
             print "Call failed: %s" % (script)
             raise
@@ -108,7 +118,7 @@ class RemotePython(object):
         '''Call a single command on the remote machine, returns it's stdout'''
         try:
             ret = check_output(['ssh', self.__remote_client, '-p %s' % (self.port)] + list(command))
-            return ret
+            return ret.strip()
         except CalledProcessError as e:
             print "Call failed: ssh %s -p %s " % (self.__remote_client, self.port) + str(list(command))
             raise        
