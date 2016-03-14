@@ -67,8 +67,7 @@ class RemotePython(object):
         call(['ssh', self.__remote_client, '-p %s' % (self.port), 'rm %s' % (script)])
         #TODO: Add check if call is successful
         
-
-    def __getEnv(self):
+    def getEnv(self):
         ret = self.runCommand('uname', '-s')
         if ret == 'Linux\n': #Linux
             profile = '~/.bashrc'
@@ -93,7 +92,7 @@ class RemotePython(object):
         # Copy script to remote machine
         self.__copyScript(script)
         try:
-            profile = self.__getEnv()
+            profile = self.getEnv()
             # pre-load the environment, Run the python script and return its stdout
             ret = check_output(['ssh',
                                 self.__remote_client,
