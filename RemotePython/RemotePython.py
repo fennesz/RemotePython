@@ -81,8 +81,8 @@ class RemotePython(object):
             profile = '~/.bashrc'
         elif ret == 'Darwin': #OSX
             profile = '~/.bash_profile'
-        else:
-            profile = '~/.login' #Solaris / rest
+        else: #Solaris / rest
+            profile = '~/.login' 
         return profile
 
     def runScript(self, script=None):
@@ -92,6 +92,7 @@ class RemotePython(object):
         The script should either be passed as an argument or predefined in the RemotePython object
         Return 'None' if no script is specified.
         '''
+        #TODO: remove this check and raise a proper exeption in __copyScript(), check is now performed twice
         if not script:
             if self.script != None:
                 script = self.script
