@@ -75,7 +75,7 @@ class RemotePython(object):
         Return the correct command to load the environment on the target machine.
         This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
         '''
-        
+        #TODO: return the complete string that can be used as the command to load the environment before execution
         ret = self.runCommand('uname', '-s')
         if ret == 'Linux': #Linux
             profile = '~/.bashrc'
@@ -87,12 +87,13 @@ class RemotePython(object):
 
     def runScript(self, script=None):
         #TODO: Quit method if any call fails with proper error handling
+        #TODO: make loading the environment optional
         '''
         Run a python script on a remote machine.
         The script should either be passed as an argument or predefined in the RemotePython object
         Return 'None' if no script is specified.
         '''
-        #TODO: remove this check and raise a proper exeption in __copyScript(), check is now performed twice
+        #TODO: remove this check and raise a proper exception in __copyScript(), check is now performed twice
         if not script:
             if self.script != None:
                 script = self.script
