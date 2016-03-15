@@ -127,7 +127,6 @@ class RemotePython(object):
 def main():
     obj = RemotePython()
     print obj.runScript('remote_script.py')
-    return 0
 
 if __name__ == '__main__':
     main()
