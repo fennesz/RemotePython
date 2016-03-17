@@ -43,20 +43,13 @@ class RemotePython(object):
         port:\t\t%s\n\
         remote_script:\t%s' % (self.__ip, self.__user, self.__remote_client, self.port, self.script)
      
-    def __copyScript(self, script=None):
+    def __copyScript(self, script):
         ''' Copy the to-be-executed script to the target machine, returns 'None is no script is specified.'''
-        if not script:
-            if self.script != None:
-                script = self.script
-            else:
-                print "No script specified"
-                return None
         try:
             call(['scp', script, '%s:%s' % (self.__remote_client, script)])
         except:
             print "Call failed: scp %s %s:%s" % (script, self.__remote_client, script)
             raise
-        #TODO: Add check if call is successful
     
     def __removeScript(self, script=None):
         ''' Remove the used script from the target machine, returns 'None' is script is not specified.'''
@@ -66,8 +59,11 @@ class RemotePython(object):
             else:
                 print "No script specified"
                 return None
-        call(['ssh', self.__remote_client, '-p %s' % (self.port), 'rm %s' % (script)])
-        #TODO: Add check if call is successful
+        try:
+            call(['ssh', self.__remote_client, '-p %s' % (self.port), 'rm %s' % (script)])
+        except CalledProcessError:
+            print "Could not remove script: ssh %s -p %s rm %s" % (self.__remote_client, self.port, script) 
+            raise
         
     def getEnv(self):
         '''
@@ -87,20 +83,17 @@ class RemotePython(object):
 
     def runScript(self, script=None, load_env=False):
         #TODO: Quit method if any call fails with proper error handling
-        #TODO: make loading the environment optional
         '''
         Run a python script on a remote machine.
         The script should either be passed as an argument or predefined in the RemotePython object
         Return 'None' if no script is specified.
+        if load_env=True it will check the environment and source the corresponding file on the remote machine
         '''
-        #TODO: remove this check and raise a proper exception in __copyScript(), check is now performed twice
         if not script:
             if self.script != None:
                 script = self.script
             else:
-                print "No script specified"
-                return None
-        
+                raise ValueError("A script should be specified in either the object or the function call")      
         try:
             # Copy script to remote machine
             self.__copyScript(script)
@@ -113,8 +106,11 @@ class RemotePython(object):
                                 'python %s' % (script)])
             self.__removeScript(script)
             return ret.strip()
-        except CalledProcessError as e:
+        except CalledProcessError:
             print "Call failed: %s" % (script)
+            raise
+        except ValueError:
+            print "Could not copy the script"
             raise
 
     def runCommand(self, command=[], load_env=False):
