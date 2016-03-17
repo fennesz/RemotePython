@@ -11,9 +11,6 @@ from getpass import getuser
 IP = 'localhost'
 USER = getuser()
 
-# IP = '192.168.0.106'
-# USER = 'allex'
-
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
 LOCAL_UNAME = 'Darwin'
 
