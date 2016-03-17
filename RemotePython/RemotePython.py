@@ -75,17 +75,17 @@ class RemotePython(object):
         Return the correct command to load the environment on the target machine.
         This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
         '''
-        #TODO: return the complete string that can be used as the command to load the environment before execution
-        ret = self.runCommand('uname', '-s')
+        profile = 'source '
+        ret = self.runCommand(['uname', '-s'])
         if ret == 'Linux': #Linux
-            profile = '~/.bashrc'
+            profile += '~/.profile;'
         elif ret == 'Darwin': #OSX
-            profile = '~/.bash_profile'
+            profile += '~/.bash_profile;'
         else: #Solaris / rest
-            profile = '~/.login' 
+            profile += '~/.login;' 
         return profile
 
-    def runScript(self, script=None):
+    def runScript(self, script=None, load_env=False):
         #TODO: Quit method if any call fails with proper error handling
         #TODO: make loading the environment optional
         '''
@@ -104,30 +104,34 @@ class RemotePython(object):
         try:
             # Copy script to remote machine
             self.__copyScript(script)
-            profile = self.getEnv()
+            load_profile = self.getEnv() if load_env == True else ''
             # pre-load the environment, Run the python script and return its stdout
             ret = check_output(['ssh',
                                 self.__remote_client,
                                 '-p %s' % (self.port),
-                                '%s %s; python %s' % ('source', profile, script)])
+                                load_profile,
+                                'python %s' % (script)])
             self.__removeScript(script)
             return ret.strip()
         except CalledProcessError as e:
             print "Call failed: %s" % (script)
             raise
 
-    def runCommand(self, *command):
+    def runCommand(self, command=[], load_env=False):
         '''Call a single command on the remote machine, returns it's stdout'''
+        load_profile = self.getEnv() if load_env == True else ''
         try:
-            ret = check_output(['ssh', self.__remote_client, '-p %s' % (self.port)] + list(command))
+            ret = check_output(['ssh',
+                                self.__remote_client,
+                                '-p %s' % (self.port),
+                                load_profile] + list(command))
             return ret.strip()
         except CalledProcessError as e:
-            print "Call failed: ssh %s -p %s " % (self.__remote_client, self.port) + str(list(command))
+            print "Call failed: ssh %s -p %s %s " % (self.__remote_client, self.port, load_profile) + str(list(command))
             raise
 
 def main():
-    obj = RemotePython()
-    print obj.runScript('remote_script.py')
+    pass
 
 if __name__ == '__main__':
     main()
