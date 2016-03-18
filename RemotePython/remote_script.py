@@ -1,5 +1,6 @@
 ''' Remote script to execute '''
 from subprocess import check_output, CalledProcessError
+from time import sleep
 
 print "the call worked"
 # print os.listdir('./')

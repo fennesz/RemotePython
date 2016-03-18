@@ -71,6 +71,7 @@ class RemotePython(object):
         Return the correct command to load the environment on the target machine.
         This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
         '''
+        #TODO: make a better way of loading the proper environment
         profile = 'source '
         ret = self.runCommand(['uname', '-s'])
         if ret == 'Linux': #Linux
@@ -122,12 +123,13 @@ class RemotePython(object):
                                 '-p %s' % (self.port),
                                 load_profile] + list(command))
             return ret.strip()
-        except CalledProcessError as e:
+        except CalledProcessError:
             print "Call failed: ssh %s -p %s %s " % (self.__remote_client, self.port, load_profile) + str(list(command))
             raise
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()
