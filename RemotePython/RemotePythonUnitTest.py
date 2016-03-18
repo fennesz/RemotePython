@@ -17,8 +17,7 @@ LOCAL_UNAME = 'Linux'
 
 # To avoid all the password requests, install sshpass on your local system
 # and set the environment variable SSHPASS to your password. In Linux, this is done like so:
-# echo "export SSHPASS=pass" >> ~/.profile
-# and then logging in again.
+# $ export SSHPASS=password
 
 class Test(unittest.TestCase):
     ''' Class containing unittests for the RemotePython module '''

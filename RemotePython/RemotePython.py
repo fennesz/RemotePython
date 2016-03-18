@@ -22,7 +22,7 @@ class RemotePython(object):
         self.__remote_client = '%s@%s' % (self.__user, self.__ip)
 
         #Use sshpass if available ... Should only be used for testing purposes.
-        if (os.environ.get('SSHPASS') != 'None'):
+        if (os.environ.get('SSHPASS', 'None') != 'None'):
             self.__ssh_string = ['sshpass', '-e']
         else:
             self.__ssh_string = ''
