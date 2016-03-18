@@ -3,10 +3,10 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
-import os
 import unittest
 from RemotePython import RemotePython
 from getpass import getuser
+
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
 IP = 'localhost'
@@ -14,6 +14,11 @@ USER = getuser()
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
 LOCAL_UNAME = 'Linux'
+
+# To avoid all the password requests, install sshpass on your local system
+# and set the environment variable SSHPASS to your password. In Linux, this is done like so:
+# echo "export SSHPASS=pass" >> ~/.profile
+# and then logging in again.
 
 class Test(unittest.TestCase):
     ''' Class containing unittests for the RemotePython module '''
@@ -26,7 +31,7 @@ class Test(unittest.TestCase):
         self.assertIn('the call worked', ret)
 
     def testRunCommand(self):
-        ''' Run uname on localhost, for OSX this is Darwin'''
+        ''' Run uname on localhost, for OSX this is Darwin.'''
         obj = RemotePython()
         ret = obj.runCommand(['uname', '-s'])
         self.assertEqual(ret, LOCAL_UNAME)

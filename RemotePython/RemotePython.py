@@ -20,7 +20,12 @@ class RemotePython(object):
         self.__ip = ip
         self.__user = user
         self.__remote_client = '%s@%s' % (self.__user, self.__ip)
-        self.__ssh_string = ''
+
+        #Use sshpass if available ... Should only be used for testing purposes.
+        if (os.environ.get('SSHPASS') != 'None'):
+            self.__ssh_string = ['sshpass', '-e']
+        else:
+            self.__ssh_string = ''
     
     @property
     def ip(self):
@@ -77,6 +82,7 @@ class RemotePython(object):
         Return the correct command to load the environment on the target machine.
         This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
         '''
+        #TODO: make a better way of loading the proper environment
         profile = 'source '
         ret = self.runCommand(['uname', '-s'])
         if ret == 'Linux': #Linux
@@ -121,9 +127,7 @@ class RemotePython(object):
 
     def runCommand(self, command=[], load_env=False):
         '''Call a single command on the remote machine, returns it's stdout'''
-        #Use sshpass if available, use that ...
-        if (os.environ.get('SSHPASS') != 'None'):
-            self.__ssh_string = ['sshpass', '-e']
+
         load_profile = self.getEnv() if load_env == True else ''
         try:
             ret = check_output(list(self.ssh_string) + ['ssh',
@@ -133,12 +137,14 @@ class RemotePython(object):
             return ret.strip()
         except CalledProcessError as e:
             sys.stdout.write("Call failed: %s %s -p %s %s" % (self.__ssh_string, self.__remote_client, self.port, load_profile))
+            #Make sure command is written correctly in console:
             for s in command:
                 sys.stdout.write(s + " ")
             raise
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()
