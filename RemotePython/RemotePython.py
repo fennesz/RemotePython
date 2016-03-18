@@ -3,9 +3,11 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
-
+import os
 from subprocess import call, check_output, CalledProcessError
 import getpass
+import sys
+
 
 class RemotePython(object):
     '''
@@ -18,6 +20,7 @@ class RemotePython(object):
         self.__ip = ip
         self.__user = user
         self.__remote_client = '%s@%s' % (self.__user, self.__ip)
+        self.__ssh_string = ''
     
     @property
     def ip(self):
@@ -33,7 +36,10 @@ class RemotePython(object):
     def user(self, value):
         self.__user = value
         self.__remote_client = '%s@%s' % (self.__user, self.__ip)
-        
+    @property
+    def ssh_string(self):
+        return self.__ssh_string
+
     def __str__(self):
         '''print the info in a RemotePython instance'''
         return '\
@@ -46,7 +52,7 @@ class RemotePython(object):
     def __copyScript(self, script):
         ''' Copy the to-be-executed script to the target machine, returns 'None is no script is specified.'''
         try:
-            call(['scp', script, '%s:%s' % (self.__remote_client, script)])
+            call(list(self.__ssh_string) + ['scp', script, '%s:%s' % (self.__remote_client, script)])
         except:
             print "Call failed: scp %s %s:%s" % (script, self.__remote_client, script)
             raise
@@ -60,7 +66,7 @@ class RemotePython(object):
                 print "No script specified"
                 return None
         try:
-            call(['ssh', self.__remote_client, '-p %s' % (self.port), 'rm %s' % (script)])
+            call(list(self.__ssh_string) + ['ssh', self.__remote_client, '-p %s' % (self.port), 'rm %s' % (script)])
         except CalledProcessError:
             print "Could not remove script: ssh %s -p %s rm %s" % (self.__remote_client, self.port, script) 
             raise
@@ -78,7 +84,7 @@ class RemotePython(object):
         elif ret == 'Darwin': #OSX
             profile += '~/.bash_profile;'
         else: #Solaris / rest
-            profile += '~/.login;' 
+            profile += '~/.login;'
         return profile
 
     def runScript(self, script=None, load_env=False):
@@ -99,7 +105,7 @@ class RemotePython(object):
             self.__copyScript(script)
             load_profile = self.getEnv() if load_env == True else ''
             # pre-load the environment, Run the python script and return its stdout
-            ret = check_output(['ssh',
+            ret = check_output(list(self.__ssh_string) + ['ssh',
                                 self.__remote_client,
                                 '-p %s' % (self.port),
                                 load_profile,
@@ -115,15 +121,20 @@ class RemotePython(object):
 
     def runCommand(self, command=[], load_env=False):
         '''Call a single command on the remote machine, returns it's stdout'''
+        #Use sshpass if available, use that ...
+        if (os.environ.get('SSHPASS') != 'None'):
+            self.__ssh_string = ['sshpass', '-e']
         load_profile = self.getEnv() if load_env == True else ''
         try:
-            ret = check_output(['ssh',
+            ret = check_output(list(self.ssh_string) + ['ssh',
                                 self.__remote_client,
                                 '-p %s' % (self.port),
                                 load_profile] + list(command))
             return ret.strip()
         except CalledProcessError as e:
-            print "Call failed: ssh %s -p %s %s " % (self.__remote_client, self.port, load_profile) + str(list(command))
+            sys.stdout.write("Call failed: %s %s -p %s %s" % (self.__ssh_string, self.__remote_client, self.port, load_profile))
+            for s in command:
+                sys.stdout.write(s + " ")
             raise
 
 def main():

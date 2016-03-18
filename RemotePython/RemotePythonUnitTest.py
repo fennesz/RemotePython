@@ -3,6 +3,7 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
+import os
 import unittest
 from RemotePython import RemotePython
 from getpass import getuser
@@ -12,7 +13,7 @@ IP = 'localhost'
 USER = getuser()
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
-LOCAL_UNAME = 'Darwin'
+LOCAL_UNAME = 'Linux'
 
 class Test(unittest.TestCase):
     ''' Class containing unittests for the RemotePython module '''
@@ -39,8 +40,8 @@ class Test(unittest.TestCase):
         if IP == 'localhost':
             print "Run command on a remote machine or create a simlink on your own machine"
         else:
-            ret = obj.runCommand(['testCommand'],load_env=True)
-            self.assertIn('ArdPi', ret)
+            ret = obj.runCommand(['echo', 'test'],load_env=True)
+            self.assertIn('test', ret)
 
     def testRemoveScript(self):
         ''' Test if hidden function '__removeScript' works '''
