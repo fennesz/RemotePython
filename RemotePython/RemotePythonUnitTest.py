@@ -44,8 +44,8 @@ class Test(unittest.TestCase):
         if IP == 'localhost':
             print "Run command on a remote machine or create a simlink on your own machine"
         else:
-            ret = obj.runCommand(['echo', 'test'],load_env=True)
-            self.assertIn('test', ret)
+            ret = obj.runCommand(['testCommand'],load_env=True)
+            self.assertIn('ArdPi', ret)
 
     def testRemoveScript(self):
         ''' Test if hidden function '__removeScript' works '''
