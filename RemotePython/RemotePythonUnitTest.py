@@ -37,12 +37,12 @@ class Test(unittest.TestCase):
         
     def testLoadEnv(self):
         ''' Run a command with loading the environment, needs a command named 'testCommand' on the target 
-        I created a simlink in my /home/allex/bin to the ls command in /bin
+        I created a symbolic link in my /home/allex/bin to the ls command in /bin
         Also create a file or object called ArdPi in the user home dir.'''
         #TODO: change this test so it creates a file and cleans up afterward on the target machine
         obj = RemotePython(ip=IP, user=USER)
         if IP == 'localhost':
-            print "Run command on a remote machine or create a simlink on your own machine"
+            print "Run command on a remote machine or create a symbolic link on your own machine"
         else:
             ret = obj.runCommand(['testCommand'],load_env=True)
             self.assertIn('ArdPi', ret)

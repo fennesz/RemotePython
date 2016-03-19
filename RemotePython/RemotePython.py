@@ -55,7 +55,7 @@ class RemotePython(object):
         try:
             call(self.__ssh_string + ['scp', script, '%s:%s' % (self.__remote_client, script)])
         except:
-            print "Call failed: scp %s %s:%s" % (script, self.__remote_client, script)
+            print "Call failed: %s scp %s %s:%s" % (' '.join(self.__ssh_string),script, self.__remote_client, script)
             raise
     
     def __removeScript(self, script=None):
