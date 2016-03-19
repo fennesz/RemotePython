@@ -17,7 +17,7 @@ IP = 'localhost'
 USER = getuser()
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
-LOCAL_UNAME = 'Darwin'
+LOCAL_UNAME = 'Linux'
 
 # To avoid all the password requests, install sshpass on your local system
 # and set the environment variable SSHPASS to your password. In Linux, this is done like so:
@@ -59,22 +59,6 @@ class Test(unittest.TestCase):
             pass                                        # Drop exception, as it's not needed for testing.
         sys.stdout = sys.__stdout__                     # Reset redirect.
         self.assertIsNot('', capturedOutput.getvalue()) # Assert there is output.
-
-    def testRunScriptValueErrorPrints(self):
-        '''Test to see if an errormessage is printed to the screen when ValueError is raised.
-            this is done by temporarily redirecting IO to capturedOutput, and checking to see if it's empty
-            after runScript is called. If the test isn't succesful, it's because the ValueError exception isn't caught
-            in RemotePython, or because nothing is printed when it is'''
-        rpy = RemotePython()
-        capturedOutput = StringIO.StringIO()               # Create StringIO object
-        sys.stdout = capturedOutput                        # redirect stdout.
-        try:
-            rpy.runScript()                                # Call function, provoking ValueError
-        except ValueError:
-            pass
-        sys.stdout = sys.__stdout__                        # Reset redirect.
-        self.assertIsNot('', capturedOutput.getvalue())    # Assert there is output.
-
 
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin.'''
