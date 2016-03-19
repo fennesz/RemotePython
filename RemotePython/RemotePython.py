@@ -54,7 +54,7 @@ class RemotePython(object):
         ''' Copy the to-be-executed script to the target machine, returns 'None is no script is specified.'''
         try:
             call(self.__ssh_string + ['scp', script, '%s:%s' % (self.__remote_client, script)])
-        except:
+        except CalledProcessError:
             print "Call failed: %s scp %s %s:%s" % (' '.join(self.__ssh_string),script, self.__remote_client, script)
             raise
     
@@ -78,15 +78,26 @@ class RemotePython(object):
         Return the correct command to load the environment on the target machine.
         This can be useful to run commands or scripts that need the environment normally loaded when starting a shell
         '''
-        #TODO: make a better way of loading the proper environment
-        profile = 'source '
-        ret = self.runCommand(['uname', '-s'])
-        if ret == 'Linux': #Linux
-            profile += '~/.profile;'
-        elif ret == 'Darwin': #OSX
-            profile += '~/.bash_profile;'
-        else: #Solaris / rest
-            profile += '~/.login;'
+
+        # if shell is bash, check for .bash_profile .bash_login and .profile in that order, source the first one found.
+        # if shell is csh, source .login
+        # csh has not been tested yet
+        profile = 'source '   
+        ret = self.runCommand(['echo $SHELL'])
+        if ret.endswith('bash'):
+            ret = self.runCommand(['ls','-a','|','grep',"'^\.'"])
+            if '.bash_profile' in ret:
+                profile += '.bash_profile;'
+            elif '.bash_login' in ret:
+                profile += '.bash_login;'
+            elif '.profile' in ret:
+                profile += '.profile;'
+            else:
+                raise ValueError("We don't know what to source..")
+        elif ret.endswith('csh'):
+            profile += '.login;'
+        else:
+            raise ValueError("Unknown shell")      
         return profile
 
     def runScript(self, script=None, load_env=False):
@@ -116,9 +127,6 @@ class RemotePython(object):
             return ret.strip()
         except CalledProcessError:
             print "Call failed: %s" % (script)
-            raise
-        except ValueError:
-            print "Could not copy the script"
             raise
 
     def runCommand(self, command=[], load_env=False):
