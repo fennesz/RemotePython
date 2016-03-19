@@ -54,7 +54,7 @@ class RemotePython(object):
         ''' Copy the to-be-executed script to the target machine, returns 'None is no script is specified.'''
         try:
             call(self.__ssh_string + ['scp', script, '%s:%s' % (self.__remote_client, script)])
-        except:
+        except CalledProcessError:
             print "Call failed: %s scp %s %s:%s" % (' '.join(self.__ssh_string),script, self.__remote_client, script)
             raise
     
@@ -127,9 +127,6 @@ class RemotePython(object):
             return ret.strip()
         except CalledProcessError:
             print "Call failed: %s" % (script)
-            raise
-        except ValueError:
-            print "Could not copy the script"
             raise
 
     def runCommand(self, command=[], load_env=False):
