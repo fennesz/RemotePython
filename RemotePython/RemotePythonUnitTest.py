@@ -3,9 +3,13 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
-import unittest
+
+from subprocess import CalledProcessError
 from RemotePython import RemotePython
 from getpass import getuser
+import unittest
+import StringIO
+import sys
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
@@ -28,6 +32,49 @@ class Test(unittest.TestCase):
         obj = RemotePython('remote_script.py', ip=IP, user=USER)
         ret = obj.runScript(load_env=True)
         self.assertIn('the call worked', ret)
+
+    def testRunScriptRaisesValueError(self):
+        ''' Test that ValueError is raised when RemotePython doesn't receive a script'''
+        obj = RemotePython()
+        with self.assertRaises(ValueError):
+            obj.runScript()
+
+    def testRunScriptRaisesCalledProcessError(self):
+        '''Test that CalledProcessError is raised when RemotePython attempts to execute nonexistant script.'''
+        obj = RemotePython()
+        with self.assertRaises(CalledProcessError):
+            obj.runScript('wrong_script.py')
+
+    def testRunScriptCalledProcessErrorPrints(self):
+        '''Test to see if an errormessage is printed to the screen when CalledProcessError is raised.
+            this is done by temporarily redirecting IO to capturedOutput, and checking to see if it's empty
+            after runScript is called. If the test isn't succesful, it's because the CalledProcessError exception isn't caught
+            in RemotePython, or because nothing is printed when it is.'''
+        rpy = RemotePython()
+        capturedOutput = StringIO.StringIO()            # Create StringIO object
+        sys.stdout = capturedOutput                     # redirect stdout.
+        try:
+            rpy.runScript('wrong_script.py')            # Call function, Provoking CalledProcessError
+        except CalledProcessError:
+            pass                                        # Drop exception, as it's not needed for testing.
+        sys.stdout = sys.__stdout__                     # Reset redirect.
+        self.assertIsNot('', capturedOutput.getvalue()) # Assert there is output.
+
+    def testRunScriptValueErrorPrints(self):
+        '''Test to see if an errormessage is printed to the screen when ValueError is raised.
+            this is done by temporarily redirecting IO to capturedOutput, and checking to see if it's empty
+            after runScript is called. If the test isn't succesful, it's because the ValueError exception isn't caught
+            in RemotePython, or because nothing is printed when it is'''
+        rpy = RemotePython()
+        capturedOutput = StringIO.StringIO()               # Create StringIO object
+        sys.stdout = capturedOutput                        # redirect stdout.
+        try:
+            rpy.runScript()                                # Call function, provoking ValueError
+        except ValueError:
+            pass
+        sys.stdout = sys.__stdout__                        # Reset redirect.
+        self.assertIsNot('', capturedOutput.getvalue())    # Assert there is output.
+
 
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin.'''
