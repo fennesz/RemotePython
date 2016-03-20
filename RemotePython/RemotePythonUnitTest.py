@@ -8,6 +8,7 @@ from subprocess import CalledProcessError
 from RemotePython import RemotePython
 from getpass import getuser
 import unittest
+import sys
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
@@ -16,7 +17,10 @@ USER = getuser()
 
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
-LOCAL_UNAME = 'Linux'
+if sys.platform.startswith('linux'):
+    LOCAL_UNAME = 'Linux'
+elif sys.platform.startswith('darwin'):
+    LOCAL_UNAME = 'Darwin'
 
 # To avoid all the password requests, install sshpass on your local system
 # and set the environment variable SSHPASS to your password. In Linux, this is done like so:
@@ -45,7 +49,7 @@ class Test(unittest.TestCase):
             obj.runScript('wrong_script.py')
 
     def testRunCommand(self):
-        ''' Run uname on localhost, for OSX this is Darwin.'''
+        ''' Run uname on localhost, for OSX this is Darwin, for linux this is Linux.'''
         obj = RemotePython()
         ret = obj.runCommand(['uname', '-s'])
         self.assertEqual(ret, LOCAL_UNAME)
