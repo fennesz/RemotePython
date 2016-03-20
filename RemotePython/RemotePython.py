@@ -140,11 +140,12 @@ class RemotePython(object):
                                 load_profile] + list(command))
 
             return ret.strip()
-        except CalledProcessError as e:
+        except CalledProcessError:
             print "Call failed: %s ssh %s -p %s %s%s" % (' '.join(self.__ssh_string),
                                                          self.__remote_client,
                                                          self.port, load_profile,
                                                          ' '.join(command))
+            raise
 
 def main():
     pass

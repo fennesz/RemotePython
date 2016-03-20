@@ -8,13 +8,12 @@ from subprocess import CalledProcessError
 from RemotePython import RemotePython
 from getpass import getuser
 import unittest
-import StringIO
-import sys
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
 IP = 'localhost'
 USER = getuser()
+
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
 LOCAL_UNAME = 'Linux'
@@ -45,26 +44,17 @@ class Test(unittest.TestCase):
         with self.assertRaises(CalledProcessError):
             obj.runScript('wrong_script.py')
 
-    def testRunScriptCalledProcessErrorPrints(self):
-        '''Test to see if an errormessage is printed to the screen when CalledProcessError is raised.
-            this is done by temporarily redirecting IO to capturedOutput, and checking to see if it's empty
-            after runScript is called. If the test isn't succesful, it's because the CalledProcessError exception isn't caught
-            in RemotePython, or because nothing is printed when it is.'''
-        rpy = RemotePython()
-        capturedOutput = StringIO.StringIO()            # Create StringIO object
-        sys.stdout = capturedOutput                     # redirect stdout.
-        try:
-            rpy.runScript('wrong_script.py')            # Call function, Provoking CalledProcessError
-        except CalledProcessError:
-            pass                                        # Drop exception, as it's not needed for testing.
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        self.assertIsNot('', capturedOutput.getvalue()) # Assert there is output.
-
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin.'''
         obj = RemotePython()
         ret = obj.runCommand(['uname', '-s'])
         self.assertEqual(ret, LOCAL_UNAME)
+
+    def testRunCommandRaisesCalledProcessError(self):
+        '''Test that CalledProcessError is raised when RemotePython attempts to execute invalid command.'''
+        obj = RemotePython()
+        with self.assertRaises(CalledProcessError):
+            obj.runCommand(['invalid', 'command'])
      
     @unittest.skipIf(IP == 'localhost', "Needs a remote machine with symbolic link to work")   
     def testLoadEnv(self):
