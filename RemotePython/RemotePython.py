@@ -126,7 +126,6 @@ class RemotePython(object):
             self.__removeScript(script)
             return ret.strip()
         except CalledProcessError:
-            print "Call failed: %s" % (script)
             raise
 
     def runCommand(self, command=[], load_env=False):
@@ -141,10 +140,6 @@ class RemotePython(object):
 
             return ret.strip()
         except CalledProcessError:
-            print "Call failed: %s ssh %s -p %s %s%s" % (' '.join(self.__ssh_string),
-                                                         self.__remote_client,
-                                                         self.port, load_profile,
-                                                         ' '.join(command))
             raise
 
 def main():
