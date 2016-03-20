@@ -68,9 +68,8 @@ class Test(unittest.TestCase):
         obj.runCommand(['mkdir', '-p', 'bin;', # create folder if not there
                         'ln', '-s', '/bin/ls', '~/bin/testingCommand;', # Symbolic link  to ls command
                         'touch', 'TemporaryTestFile']) #create temporary file to look for
-        ret = obj.runCommand(['testingCommand;',
-                              'rm', '~/bin/testingCommand TemporaryTestFile'],
-                             load_env=True) # Environment command execution and cleanup
+        ret = obj.runCommand(['testingCommand'], load_env=True) # Environment command execution
+        obj.runCommand(['rm', '~/bin/testingCommand TemporaryTestFile']) # Cleanup
         self.assertIn('TemporaryTestFile', ret)
 
     def testRemoveScript(self):
