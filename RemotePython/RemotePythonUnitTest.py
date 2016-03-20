@@ -84,7 +84,6 @@ class Test(unittest.TestCase):
 
     def testPrint(self):
         ''' Print the default object '''
-#         print self.testPrint.__doc__
         print RemotePython()
 
 if __name__ == "__main__":
