@@ -128,7 +128,7 @@ class RemotePython(object):
         except CalledProcessError:
             raise
 
-    def runCommand(self, command=[], load_env=False):
+    def runCommand(self, command, load_env=False):
         '''Call a single command on the remote machine, returns it's stdout'''
 
         load_profile = self.getEnv() if load_env == True else ''
