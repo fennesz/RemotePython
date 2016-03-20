@@ -3,17 +3,20 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
-import unittest
+
+from subprocess import CalledProcessError
 from RemotePython import RemotePython
 from getpass import getuser
+import unittest
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
 IP = 'localhost'
 USER = getuser()
 
+
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
-LOCAL_UNAME = 'Darwin'
+LOCAL_UNAME = 'Linux'
 
 # To avoid all the password requests, install sshpass on your local system
 # and set the environment variable SSHPASS to your password. In Linux, this is done like so:
@@ -29,11 +32,29 @@ class Test(unittest.TestCase):
         ret = obj.runScript(load_env=True)
         self.assertIn('the call worked', ret)
 
+    def testRunScriptRaisesValueError(self):
+        ''' Test that ValueError is raised when RemotePython doesn't receive a script'''
+        obj = RemotePython()
+        with self.assertRaises(ValueError):
+            obj.runScript()
+
+    def testRunScriptRaisesCalledProcessError(self):
+        '''Test that CalledProcessError is raised when RemotePython attempts to execute nonexistant script.'''
+        obj = RemotePython()
+        with self.assertRaises(CalledProcessError):
+            obj.runScript('wrong_script.py')
+
     def testRunCommand(self):
         ''' Run uname on localhost, for OSX this is Darwin.'''
         obj = RemotePython()
         ret = obj.runCommand(['uname', '-s'])
         self.assertEqual(ret, LOCAL_UNAME)
+
+    def testRunCommandRaisesCalledProcessError(self):
+        '''Test that CalledProcessError is raised when RemotePython attempts to execute invalid command.'''
+        obj = RemotePython()
+        with self.assertRaises(CalledProcessError):
+            obj.runCommand(['invalid', 'command'])
      
     @unittest.skipIf(IP == 'localhost', "Needs a remote machine with symbolic link to work")   
     def testLoadEnv(self):
