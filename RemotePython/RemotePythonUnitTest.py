@@ -59,17 +59,28 @@ class Test(unittest.TestCase):
         with self.assertRaises(CalledProcessError):
             obj.runCommand(['invalid', 'command'])
      
-    @unittest.skipIf(IP == 'localhost', "Needs a remote machine with symbolic link to work")   
+       
     def testLoadEnv(self):
         ''' Run a command on target which has been symbolically linked to /bin/ls - and cleans up afterwards.
             If it fails, it might be because your load environment file isn't found by RemotePython, or because
             the unix system in question has an unorthodox file structure.'''
+        
         obj = RemotePython(ip=IP, user=USER)
+        try:
+            delete_bin = obj.runCommand(["[ -d ./bin ]"]) # returns None if ./bin exists
+        except CalledProcessError: # raises CalledProcessError if ./bin doen not exist
+            delete_bin = True # ./bin did not exist yet so delete it afterwards
+        #Set-up:                 
         obj.runCommand(['mkdir', '-p', 'bin;', # create folder if not there
                         'ln', '-s', '/bin/ls', '~/bin/testingCommand;', # Symbolic link  to ls command
                         'touch', 'TemporaryTestFile']) #create temporary file to look for
+        #Test:
         ret = obj.runCommand(['testingCommand'], load_env=True) # Environment command execution
-        obj.runCommand(['rm', '~/bin/testingCommand TemporaryTestFile']) # Cleanup
+        #Break-down:
+        if delete_bin:
+            obj.runCommand(['rm -r','./bin/', 'TemporaryTestFile'])
+        else:
+            obj.runCommand(['rm', '~/bin/testingCommand TemporaryTestFile']) # Cleanup
         self.assertIn('TemporaryTestFile', ret)
 
     def testRemoveScript(self):
