@@ -3,10 +3,9 @@ Created on Mar 6, 2016
 
 @author: allexveldman
 '''
-
+from getpass import getuser
 from subprocess import CalledProcessError
 from RemotePython import RemotePython
-from getpass import getuser
 import unittest
 import sys
 
@@ -60,15 +59,29 @@ class Test(unittest.TestCase):
         with self.assertRaises(CalledProcessError):
             obj.runCommand(['invalid', 'command'])
      
-    @unittest.skipIf(IP == 'localhost', "Needs a remote machine with symbolic link to work")   
+       
     def testLoadEnv(self):
-        ''' Run a command with loading the environment, needs a command named 'testCommand' on the target 
-        I created a symbolic link in my /home/allex/bin to the ls command in /bin
-        Also create a file or object called ArdPi in the user home dir.'''
-        #TODO: change this test so it creates a file and cleans up afterward on the target machine
+        ''' Run a command on target which has been symbolically linked to /bin/ls - and cleans up afterwards.
+            If it fails, it might be because your load environment file isn't found by RemotePython, or because
+            the unix system in question has an unorthodox file structure.'''
+        
         obj = RemotePython(ip=IP, user=USER)
-        ret = obj.runCommand(['testCommand'],load_env=True)
-        self.assertIn('ArdPi', ret)
+        try:
+            delete_bin = obj.runCommand(["[ -d ./bin ]"]) # returns None if ./bin exists
+        except CalledProcessError: # raises CalledProcessError if ./bin doen not exist
+            delete_bin = True # ./bin did not exist yet so delete it afterwards
+        #Set-up:                 
+        obj.runCommand(['mkdir', '-p', 'bin;', # create folder if not there
+                        'ln', '-s', '/bin/ls', '~/bin/testingCommand;', # Symbolic link  to ls command
+                        'touch', 'TemporaryTestFile']) #create temporary file to look for
+        #Test:
+        ret = obj.runCommand(['testingCommand'], load_env=True) # Environment command execution
+        #Break-down:
+        if delete_bin:
+            obj.runCommand(['rm -r','./bin/', 'TemporaryTestFile'])
+        else:
+            obj.runCommand(['rm', '~/bin/testingCommand TemporaryTestFile']) # Cleanup
+        self.assertIn('TemporaryTestFile', ret)
 
     def testRemoveScript(self):
         ''' Test if hidden function '__removeScript' works '''
