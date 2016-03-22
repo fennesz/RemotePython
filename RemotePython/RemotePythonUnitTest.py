@@ -12,8 +12,8 @@ import sys
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
-IP = 'ssh.fedthund.dk'
-USER = 'pi'
+IP = 'localhost'
+USER = getuser()
 
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
