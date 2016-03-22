@@ -85,33 +85,41 @@ class Test(unittest.TestCase):
         self.assertIn('TemporaryTestFile', ret)
 
     def testLoadEnvUnkownBashRaisesValueError(self):
-        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='crazyFish bash'):
+        '''Creates mock of the RemotePython method runCommand mimicking an unkown shell,
+         and invokes getEnv. Expecting ValueError'''
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='test'):
             obj = RemotePython()
             with self.assertRaises(ValueError):
                 obj.getEnv()
 
     def testLoadEnvUnkownBashRaisesValueError(self):
-        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='crazyFish'):
+        '''Creates mock of the RemotePython method runCommand mimicking an unkown bash shell,
+         and invokes getEnv. Expecting ValueError'''
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='test bash'):
             obj = RemotePython()
             with self.assertRaises(ValueError):
                 obj.getEnv()
 
     def testLoadEnvBashProfile(self):
+        '''Creates mock of the RemotePython method runCommand doing coverage test of loadEnv: .bash_profile'''
         with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.bash_profile bash'):
             obj = RemotePython()
             self.assertEquals(obj.getEnv(), 'source .bash_profile;')
 
     def testLoadEnvBashLogin(self):
+        '''Creates mock of the RemotePython method runCommand doing coverage test of loadEnv: .bash_login'''
         with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.bash_login bash'):
             obj = RemotePython()
             self.assertEquals(obj.getEnv(), 'source .bash_login;')
 
     def testLoadEnvProfile(self):
+        '''Creates mock of the RemotePython method runCommand doing coverage test of loadEnv: .profile'''
         with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.profile bash'):
             obj = RemotePython()
             self.assertEquals(obj.getEnv(), 'source .profile;')
 
     def testLoadEnvCsh(self):
+        '''Creates mock of the RemotePython method runCommand doing coverage test of loadEnv: .login'''
         with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.login csh'):
             obj = RemotePython()
             self.assertEquals(obj.getEnv(), 'source .login;')
