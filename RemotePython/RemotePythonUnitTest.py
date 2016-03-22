@@ -6,13 +6,14 @@ Created on Mar 6, 2016
 from getpass import getuser
 from subprocess import CalledProcessError
 from RemotePython import RemotePython
+import mock
 import unittest
 import sys
 
 
 # Change these to your remote machine keys to execute the testRunScript() test on your remote machine
-IP = 'localhost'
-USER = getuser()
+IP = 'ssh.fedthund.dk'
+USER = 'pi'
 
 
 # LOCAL_UNAME should be the result you get from running 'uname -s' on your local machine
@@ -82,6 +83,38 @@ class Test(unittest.TestCase):
         else:
             obj.runCommand(['rm', '~/bin/testingCommand TemporaryTestFile']) # Cleanup
         self.assertIn('TemporaryTestFile', ret)
+
+    def testLoadEnvUnkownBashRaisesValueError(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='crazyFish bash'):
+            obj = RemotePython()
+            with self.assertRaises(ValueError):
+                obj.getEnv()
+
+    def testLoadEnvUnkownBashRaisesValueError(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='crazyFish'):
+            obj = RemotePython()
+            with self.assertRaises(ValueError):
+                obj.getEnv()
+
+    def testLoadEnvBashProfile(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.bash_profile bash'):
+            obj = RemotePython()
+            self.assertEquals(obj.getEnv(), 'source .bash_profile;')
+
+    def testLoadEnvBashLogin(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.bash_login bash'):
+            obj = RemotePython()
+            self.assertEquals(obj.getEnv(), 'source .bash_login;')
+
+    def testLoadEnvProfile(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.profile bash'):
+            obj = RemotePython()
+            self.assertEquals(obj.getEnv(), 'source .profile;')
+
+    def testLoadEnvCsh(self):
+        with mock.patch.object(RemotePython, 'runCommand', create=True, return_value='.login csh'):
+            obj = RemotePython()
+            self.assertEquals(obj.getEnv(), 'source .login;')
 
     def testRemoveScript(self):
         ''' Test if hidden function '__removeScript' works '''
